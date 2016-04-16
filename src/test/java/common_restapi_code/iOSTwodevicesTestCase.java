@@ -22,8 +22,18 @@ import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.ios.IOSDriver;
 import org.junit.runners.Parameterized;
 
-//@RunWith(KeynoteParallel.class)
-@RunWith(Parameterized.class)
+/**
+ * Please change the Access server URL based on your environment.This script is pointing it to Keynote Mobile Testing Shared environment.
+ * Please provide Your Keynote Mobile Test Automation account User_Name
+ * Please provide Your Keynote Mobile Test Automation account Password
+ * Please provide Device MCD(s).
+ *
+ * @author  Kapeel Dev Maheshwari
+ * 
+ */
+
+@RunWith(KeynoteParallel.class)
+//@RunWith(Parameterized.class)
 public class iOSTwodevicesTestCase {
 	    private static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
 	   private static final String USER_NAME = "aditya@mc.com";
@@ -36,7 +46,7 @@ public class iOSTwodevicesTestCase {
 	    public static Collection deviceMCDs() {
 	       return Arrays.asList(new Object[][] {
 	          {8501 },  //Enter device mcd's here
-	          { 9217 },
+	          { 9217 }
 	          //{6984}
 	       });
 	    }
@@ -99,6 +109,7 @@ public class iOSTwodevicesTestCase {
 			capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/5446.ipa");
 			
 			try {
+				System.out.println("Executing Appium script on " + mcd);
 				driver = new IOSDriver(new URL(appiumUrl), capabilities);
 				
 				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]")).click();
@@ -134,5 +145,3 @@ public class iOSTwodevicesTestCase {
 	    	System.out.println("Logged out from Keynote Mobile Testing Session");
 	    }
 }
-
-	    

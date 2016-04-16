@@ -2,7 +2,10 @@ package common_restapi_code;
 import com.keynote.REST.KeynoteRESTClient;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.ios.IOSDriver;
+
+import org.apache.http.util.Asserts;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -16,21 +19,24 @@ import java.net.URL;
  * Please change the Access server URL based on your environment.This script is pointing it to Keynote Mobile Testing Shared environment.
  * Please provide Your Keynote Mobile Test Automation account User_Name
  * Please provide Your Keynote Mobile Test Automation account Password
- * Please provide Device MCD.
+ * Please provide Device MCD(s).
  *
  * @author  Kapeel Dev Maheshwari
  * 
  */
 
 public class iOSSingleDeviceTestCase {
-
-    public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
+	/*  public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
     public static final String USER_NAME = "******";
-    public static final String PASSWORD = "******";
+    public static final String PASSWORD = "******";*/
+    
+    public static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
+    public static final String USER_NAME = "aditya@mc.com";
+    public static final String PASSWORD = "Harmony1";
 	
 	
 
-    static int mcd = 000; //Please provide the mcd number here.
+    static int mcd = 9217; //Please provide the mcd number here.
     static String appiumUrl;
     static AppiumDriver driver = null;
     
@@ -41,17 +47,26 @@ public class iOSSingleDeviceTestCase {
     public static void setUp() throws Exception {
         try {
             // create the session
-            keynoteClient = new KeynoteRESTClient(USER_NAME, PASSWORD, ACCESS_SERVER_URL);
-            keynoteClient.createSession();
+        	 keynoteClient = new KeynoteRESTClient(USER_NAME, PASSWORD, ACCESS_SERVER_URL);
+             keynoteClient.createSession();
 
-            // lock a specific device
-            keynoteClient.lockDevice(mcd);
+             // lock a specific device
+             keynoteClient.lockDevice(mcd);
+             System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
 
-            // fire up appium on the device
-            appiumUrl = keynoteClient.startAppium(mcd);
+             // fire up appium on the device
+             appiumUrl = keynoteClient.startAppium(mcd);
+             if(appiumUrl.isEmpty())
+             {
+             Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
+             }
+             
+             System.out.println("Appium is started on mcd "+ mcd);
 
-            Thread.sleep(5000);
+             Thread.sleep(5000);
 
+     
+         
         }catch (Exception e){
             System.out.println("Unable to create Keynote REST api connection. Exiting");
             keynoteClient.logoutSession();
@@ -72,7 +87,7 @@ public class iOSSingleDeviceTestCase {
 		
 		//either provide  the URL to download the app as given below or provide the appActivity and appPackage in set capability.
 		
-		capabilities.setCapability("app", " ");
+		capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/5446.ipa ");
 		
 		//capabilities.setCapability("appPackage", "com.expensemanager");
         //capabilities.setCapability("appActivity", "com.expensemanager.ExpenseManager");
@@ -97,13 +112,16 @@ public class iOSSingleDeviceTestCase {
 
     @After
     public void tearDown() throws Exception {
-
-        //driver.closeApp();
-    	if (driver != null)
-        	driver.quit();
+    	driver.quit();
         keynoteClient.stopAppium(mcd);
-        keynoteClient.logoutSession();
-
+         
+    }
+    @AfterClass
+    public static void logoutSystem()
+   
+    {
+    	keynoteClient.logoutSession();
+    	System.out.println("Logged out from Keynote Mobile Testing Session");
     }
 
 }

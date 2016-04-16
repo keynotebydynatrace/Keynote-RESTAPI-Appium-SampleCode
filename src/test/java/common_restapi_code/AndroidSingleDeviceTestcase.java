@@ -2,7 +2,10 @@ package common_restapi_code;
 import com.keynote.REST.KeynoteRESTClient;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+
+import org.apache.http.util.Asserts;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -25,13 +28,17 @@ import java.util.concurrent.TimeUnit;
 
 public class AndroidSingleDeviceTestcase {
 
-    public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
+  /*  public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
     public static final String USER_NAME = "******";
-    public static final String PASSWORD = "******";
+    public static final String PASSWORD = "******";*/
+    
+    public static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
+    public static final String USER_NAME = "aditya@mc.com";
+    public static final String PASSWORD = "Harmony1";
 
-    static int mcd = 0000;
+    static int mcd = 9233;
     static String appiumUrl;
-    private AppiumDriver driver;
+    private static AppiumDriver driver;
     private static KeynoteRESTClient keynoteClient;
 
     @BeforeClass
@@ -44,13 +51,22 @@ public class AndroidSingleDeviceTestcase {
 
             // lock a specific device
             keynoteClient.lockDevice(mcd);
+            System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
 
             // fire up appium on the device
             appiumUrl = keynoteClient.startAppium(mcd);
+            if(appiumUrl.isEmpty())
+            {
+            Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
+            }
+            
+            System.out.println("Appium is started on mcd "+ mcd);
 
             Thread.sleep(5000);
 
-        }catch (Exception e){
+        }
+        
+        catch (Exception e){
             System.out.println("Unable to create Keynote REST api connection. Exiting");
             keynoteClient.logoutSession();
             System.exit(1);
@@ -71,11 +87,11 @@ public class AndroidSingleDeviceTestcase {
        
       //either provide  the URL to download the application as given below or provide the appActivity and appPackage in set capability.
       
-        capabilities.setCapability("app", "http://dademo111.deviceanywhere.com/app/534050.apk");
+        //capabilities.setCapability("app", "http://dademo111.deviceanywhere.com/app/534050.apk");
         
         
-        //capabilities.setCapability("appPackage", "com.expensemanager");
-        //capabilities.setCapability("appActivity", "com.expensemanager.ExpenseManager");
+        capabilities.setCapability("appPackage", "com.expensemanager");
+        capabilities.setCapability("appActivity", "com.expensemanager.ExpenseManager");
         
         
         try {
@@ -118,29 +134,22 @@ public class AndroidSingleDeviceTestcase {
             e.printStackTrace();
         }
 
-        finally
-        {
-
-            driver.quit();
-            
-            
-        }
-
 
     }
 
+    
 
-
-    @After
-    public void tearDown() throws Exception {
+    @AfterClass 
+    public static void logoutSystem() {
 
         //driver.closeApp();
         driver.quit();
-        
         keynoteClient.stopAppium(mcd);
         keynoteClient.logoutSession();
+    	System.out.println("Logged out from Keynote Mobile Testing Session");
+    }
 
     }
 
-}
+
  

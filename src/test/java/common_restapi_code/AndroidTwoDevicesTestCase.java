@@ -4,12 +4,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.http.util.Asserts;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,9 +21,18 @@ import com.keynote.REST.KeynoteRESTClient;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.runners.Parameterized;
+/**
+ * Please change the Access server URL based on your environment.This script is pointing it to Keynote Mobile Testing Shared environment.
+ * Please provide Your Keynote Mobile Test Automation account User_Name
+ * Please provide Your Keynote Mobile Test Automation account Password
+ * Please provide Device MCD(s).
+ *
+ * @author  Kapeel Dev Maheshwari
+ * 
+ */
 
-//@RunWith(KeynoteParallel.class) //un-commenting this will run the test in parallel on multiple devices 
-@RunWith(Parameterized.class) // un-commenting this will run the test in serial on multiple devices
+@RunWith(KeynoteParallel.class) //un-commenting this will run the test in parallel on multiple devices 
+//@RunWith(Parameterized.class) // un-commenting this will run the test in serial on multiple devices
 
 public class AndroidTwoDevicesTestCase {
 	    private static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
@@ -40,6 +48,7 @@ public class AndroidTwoDevicesTestCase {
 	       return Arrays.asList(new Object[][] {
 	          { 9233 },  //Enter device mcd's here
 	          { 8896 },
+	          {8853},
 	          {9021}
 	       });
 	    }
@@ -103,8 +112,9 @@ public class AndroidTwoDevicesTestCase {
 	        capabilities.setCapability("platformVersion", "5.0.1");
 	        capabilities.setCapability("platformName","Android");
 	       
-	      //either provide  the URL to download the application as given below or provide the appActivity and appPackage in set capability.
+	      //either provide  the URL to download the application as given below or provide the appActivity and appPackage in setcapability.
 	      
+	        capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/6480.apk");
 	     
 	        capabilities.setCapability("appPackage", "com.expensemanager");
 	        capabilities.setCapability("appActivity", "com.expensemanager.ExpenseManager");
@@ -125,7 +135,7 @@ public class AndroidTwoDevicesTestCase {
 	            driver.findElement(By.xpath("//android.widget.EditText[@resource-id='com.expensemanager:id/payee']")).sendKeys("BOFA");
 	            driver.findElement(By.xpath("//android.widget.ImageButton[@resource-id='com.expensemanager:id/editCategory']")).click();
 	           // driver.findElement(By.name("OK")).click();
-	            driver.findElement(By.name("Loans")).click();
+	           /* driver.findElement(By.name("Loans")).click();
 	            driver.findElement(By.name("Auto")).click();
 	            driver.findElement(By.xpath("//android.widget.ImageButton[@resource-id='com.expensemanager:id/editPaymentMethod']")).click();
 	            driver.findElement(By.name("Credit Card")).click();
@@ -133,7 +143,7 @@ public class AndroidTwoDevicesTestCase {
 	            driver.findElement(By.name("Today Expense:")).click();
 	            driver.findElement(By.name("Loans:Auto")).click();
 	            driver.findElement(By.name("Delete")).click();
-	            driver.findElement(By.name("OK")).click();
+	            driver.findElement(By.name("OK")).click();*/
 	            driver.navigate().back();
 	            
 	        } catch (MalformedURLException e1) {
