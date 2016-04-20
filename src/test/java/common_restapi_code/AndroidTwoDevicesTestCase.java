@@ -46,10 +46,11 @@ public class AndroidTwoDevicesTestCase {
 	    @Parameterized.Parameters
 	    public static Collection deviceMCDs() {
 	       return Arrays.asList(new Object[][] {
-	          { 9233 },  //Enter device mcd's here
-	          { 8896 },
-	          {8853},
+	          { 9233 }, //Enter device mcd's here
 	          {9021}
+	         /*{ 8896 },
+	          {8853},
+	          */
 	       });
 	    }
 	 
@@ -91,7 +92,7 @@ public class AndroidTwoDevicesTestCase {
 	            Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
 	            }
 	            
-	            System.out.println("Appium is started on mcd "+ mcd);
+	            System.out.println("Appium Session is started on mcd "+ mcd);
 	            this.mcd = mcd;
 	            Thread.sleep(5000);
 
@@ -125,6 +126,7 @@ public class AndroidTwoDevicesTestCase {
 	    		
 	    		
 	            driver = new AndroidDriver(new URL(appiumUrl), capabilities);
+	            System.out.println("Executing Appium script on " + mcd);
 	            //driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 	            Thread.sleep(2000);
 	            driver.findElement(By.name("Add New Expense")).click();
@@ -156,8 +158,9 @@ public class AndroidTwoDevicesTestCase {
 	    @After
 	    public void tearDown() throws Exception {
 	    	driver.quit();
-	        keynoteClient.stopAppium(mcd);
-	         
+	        //keynoteClient.stopAppium(mcd); // This will stop the Appium without log
+	        keynoteClient.stopappiumwithlog(sessionIDEnsem, mcd);//This will stop the Appium and will download the Appium log file at userprofile desktop
+	       
 	    }
 	    
 	    @AfterClass

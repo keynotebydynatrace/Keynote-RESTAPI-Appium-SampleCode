@@ -7,9 +7,11 @@ import org.junit.Assert;
 
 import com.google.common.base.Throwables;
 
-
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,6 +24,7 @@ public class KeynoteRESTClient {
     private String pass;
     private URL accessServerUrl;
     private String sessionID;
+    private  OutputStream outputStream = null;
 
 
     public KeynoteRESTClient(String email, String pass, String url) throws Exception{
@@ -147,6 +150,52 @@ public class KeynoteRESTClient {
             e.printStackTrace();
         }
         return null;
+    }
+    
+    public void stopappiumwithlog(String sessionIDEnsem,int mcd) {
+    
+    InputStream[] stopappiumwithlog = RESTUtils.restRequest(sessionIDEnsem
+			+ "/stop-appium-with-log", "GET", "application/json",
+			"application/octet-stream", null);
+
+	System.out.println("Stopping-Appium with log file for mcd " + mcd);
+
+	try {
+		
+		outputStream = new FileOutputStream(new File(
+				System.getProperty("user.home") + "/Desktop/appiumlog" + mcd + ".zip")); 
+
+		int read = 0;
+		byte[] bytes = new byte[1024];
+
+		while ((read = stopappiumwithlog[0].read(bytes)) != -1) {
+			outputStream.write(bytes, 0, read);
+			outputStream.flush();
+		}
+
+		System.out.println("Appium log is downloaded for mcd " +mcd);
+
+	} catch (IOException e) {
+		e.printStackTrace();
+	} finally {
+		if (outputStream != null) {
+			try {
+				outputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		if (outputStream != null) {
+			try {
+				// outputStream.flush();
+				outputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+	}
+	
     }
     
     

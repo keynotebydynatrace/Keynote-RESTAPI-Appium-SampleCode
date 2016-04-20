@@ -39,6 +39,7 @@ public class iOSSingleDeviceTestCase {
     static int mcd = 9217; //Please provide the mcd number here.
     static String appiumUrl;
     static AppiumDriver driver = null;
+    static String sessionIDEnsem="";
     
     private static KeynoteRESTClient keynoteClient;
 
@@ -51,8 +52,8 @@ public class iOSSingleDeviceTestCase {
              keynoteClient.createSession();
 
              // lock a specific device
-             keynoteClient.lockDevice(mcd);
-             System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
+             sessionIDEnsem=keynoteClient.lockDevice(mcd);
+	            System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
 
              // fire up appium on the device
              appiumUrl = keynoteClient.startAppium(mcd);
@@ -61,7 +62,7 @@ public class iOSSingleDeviceTestCase {
              Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
              }
              
-             System.out.println("Appium is started on mcd "+ mcd);
+             System.out.println("Appium Session is started on mcd "+ mcd);
 
              Thread.sleep(5000);
 
@@ -96,6 +97,7 @@ public class iOSSingleDeviceTestCase {
 		try {
 			driver = new IOSDriver(new URL(appiumUrl), capabilities);
 	    
+			System.out.println("Executing Appium script on " + mcd);
 			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]")).click();
 			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[2]/UIATextField[1]")).sendKeys("Hello");
 			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[3]/UIATextField[1]")).sendKeys("Mytesting");
@@ -113,7 +115,9 @@ public class iOSSingleDeviceTestCase {
     @After
     public void tearDown() throws Exception {
     	driver.quit();
-        keynoteClient.stopAppium(mcd);
+        //keynoteClient.stopAppium(mcd); // This will stop the Appium without log
+        keynoteClient.stopappiumwithlog(sessionIDEnsem, mcd);// This will stop the Appium and will download the Appium log file at userprofile desktop
+       
          
     }
     @AfterClass

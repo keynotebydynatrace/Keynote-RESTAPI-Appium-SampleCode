@@ -28,7 +28,7 @@ import org.junit.runners.Parameterized;
  * Please provide Your Keynote Mobile Test Automation account Password
  * Please provide Device MCD(s).
  *
- * @author  Kapeel Dev Maheshwari
+ * @author  Kapeel Dev Maheshwari.
  * 
  */
 
@@ -90,7 +90,7 @@ public class iOSTwodevicesTestCase {
 	            Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
 	            }
 	            
-	            System.out.println("Appium is strated on mcd "+ mcd);
+	            System.out.println("Appium Session is started on mcd "+ mcd);
 	            this.mcd = mcd;
 	            Thread.sleep(5000);
 
@@ -106,7 +106,7 @@ public class iOSTwodevicesTestCase {
 			capabilities.setCapability("deviceName", "iPhon6");
 			capabilities.setCapability("platformName", "iOS");
 			// capabilities.setCapability("browserName", "safari");
-			capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/5446.ipa");
+			capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/6509.ipa");
 			
 			try {
 				System.out.println("Executing Appium script on " + mcd);
@@ -131,9 +131,10 @@ public class iOSTwodevicesTestCase {
 	    public void tearDown() throws Exception {
 
 	        
-	        driver.quit();
-	        keynoteClient.stopAppium(mcd);
-	      
+	    	driver.quit();
+	        //keynoteClient.stopAppium(mcd); // This will stop the Appium without log
+	        keynoteClient.stopappiumwithlog(sessionIDEnsem, mcd);// This will stop the Appium and will download the Appium log file at userprofile desktop
+	       
 
 	    }
 	    

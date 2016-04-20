@@ -40,6 +40,7 @@ public class AndroidSingleDeviceTestcase {
     static String appiumUrl;
     private static AppiumDriver driver;
     private static KeynoteRESTClient keynoteClient;
+    static String sessionIDEnsem="";
 
     @BeforeClass
     /* First setup Keynote Connection */
@@ -50,7 +51,7 @@ public class AndroidSingleDeviceTestcase {
             keynoteClient.createSession();
 
             // lock a specific device
-            keynoteClient.lockDevice(mcd);
+            sessionIDEnsem=keynoteClient.lockDevice(mcd);
             System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
 
             // fire up appium on the device
@@ -60,7 +61,7 @@ public class AndroidSingleDeviceTestcase {
             Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
             }
             
-            System.out.println("Appium is started on mcd "+ mcd);
+            System.out.println("Appium Session is started on mcd "+ mcd);
 
             Thread.sleep(5000);
 
@@ -104,7 +105,7 @@ public class AndroidSingleDeviceTestcase {
 
         try
         {
-
+        	System.out.println("Executing Appium script on " + mcd);
             driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
             Thread.sleep(2000);
             driver.findElement(By.name("Add New Expense")).click();
@@ -137,14 +138,19 @@ public class AndroidSingleDeviceTestcase {
 
     }
 
-    
+    @After
+    public void tearDown() throws Exception {
+    	driver.quit();
+        //keynoteClient.stopAppium(mcd); // This will stop the Appium without log
+        keynoteClient.stopappiumwithlog(sessionIDEnsem, mcd);// This will stop the Appium and will download the Appium log file at userprofile desktop
+       
+         
+    }
 
     @AfterClass 
     public static void logoutSystem() {
 
-        //driver.closeApp();
-        driver.quit();
-        keynoteClient.stopAppium(mcd);
+        
         keynoteClient.logoutSession();
     	System.out.println("Logged out from Keynote Mobile Testing Session");
     }
