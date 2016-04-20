@@ -48,9 +48,7 @@ public class AndroidTwoDevicesTestCase {
 	       return Arrays.asList(new Object[][] {
 	          { 9233 }, //Enter device mcd's here
 	          {9021}
-	         /*{ 8896 },
-	          {8853},
-	          */
+	         
 	       });
 	    }
 	 

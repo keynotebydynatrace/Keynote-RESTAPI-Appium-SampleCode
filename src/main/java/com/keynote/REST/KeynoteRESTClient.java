@@ -173,7 +173,7 @@ public class KeynoteRESTClient {
 			outputStream.flush();
 		}
 
-		System.out.println("Appium log is downloaded for mcd " +mcd);
+		System.out.println("Appium log is downloaded for mcd " +mcd + " at " + System.getProperty("user.home") + "/Desktop");
 
 	} catch (IOException e) {
 		e.printStackTrace();
