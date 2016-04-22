@@ -1,19 +1,16 @@
 package common_restapi_code;
 
-import java.io.File;
-import java.io.IOException;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.apache.commons.io.FileUtils;
+
 import org.apache.http.util.Asserts;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
+
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import com.keynote.REST.KeynoteRESTClient;
