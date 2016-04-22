@@ -39,7 +39,7 @@ public class MobileDeviceSafari {
 	
 	
 
-    static int mcd = 8501; //Please provide the mcd number here.
+    static int mcd = 8501; // Please provide the mcd number here.
     static String appiumUrl;
     static AppiumDriver driver = null;
     static String sessionIDEnsem="";
@@ -48,6 +48,7 @@ public class MobileDeviceSafari {
 
     @BeforeClass
     /* First setup Keynote Connection */
+    
     public static void setUp() throws Exception {
         try {
             // create the session
@@ -69,8 +70,6 @@ public class MobileDeviceSafari {
 
              Thread.sleep(5000);
 
-     
-         
         }catch (Exception e){
             System.out.println("Unable to create Keynote REST api connection. Exiting");
             keynoteClient.logoutSession();
