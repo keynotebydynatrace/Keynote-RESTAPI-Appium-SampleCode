@@ -1,9 +1,11 @@
 package common_restapi_code;
+
 import com.keynote.REST.KeynoteRESTClient;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.ios.IOSDriver;
 
 import org.apache.http.util.Asserts;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -14,119 +16,160 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-
 /**
- * Please change the Access server URL based on your environment.This script is pointing it to Keynote Mobile Testing Shared environment.
- * Please provide Your Keynote Mobile Test Automation account User_Name
- * Please provide Your Keynote Mobile Test Automation account Password
- * Please provide Device MCD(s).
+ * Please change the Access server URL based on your environment.This script is
+ * pointing it to Keynote Mobile Testing Shared environment. 
+ * Please provide Your Keynote Mobile Test Automation account User_Name,Password and the device MCD 
  *
- * @author  Kapeel Dev Maheshwari
+ * @author Kapeel Dev Maheshwari
  * 
  */
 
 public class iOSSingleDeviceTestCase {
-	/*  public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
-    public static final String USER_NAME = "******";
-    public static final String PASSWORD = "******";*/
-    
-    public static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
-    public static final String USER_NAME = "aditya@mc.com";
-    public static final String PASSWORD = "Harmony1";
 	
+	public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
+	public static final String USER_NAME = "******";
+	public static final String PASSWORD = "******";
+	private static int mcd = 1234; // Please provide the mcd number here.
+	private static String appiumUrl;
+	private static AppiumDriver driver = null;
+	private static String sessionIDEnsem = "";
+	// Please provide the application information here
+	private static String appName = "KeynoteDemo";
+	private static String appVersion = "1.3";
+	private static String fileName = "KitchenSinkApp.ipa";
+	private static String appType = "iPhone";
+	private static String filepath = "C:/Users/kmaheshw.WIN/Desktop/8.1 Sprint/iOSOfflineAutomation/KitchenSinkApp.ipa";
+	private static int ApplicationID ;
+
+	private static KeynoteRESTClient keynoteClient;
+
+	@BeforeClass
 	
+	/* First setup Keynote Connection */
+	public static void setUp() throws Exception {
+		try {
+			// create the session
+			keynoteClient = new KeynoteRESTClient(USER_NAME, PASSWORD, ACCESS_SERVER_URL);
+			keynoteClient.createSession();
 
-    static int mcd = 9217; //Please provide the mcd number here.
-    static String appiumUrl;
-    static AppiumDriver driver = null;
-    static String sessionIDEnsem="";
-    
-    private static KeynoteRESTClient keynoteClient;
+			// lock a specific device
+			sessionIDEnsem = keynoteClient.lockDevice(mcd);
+			System.out.println("Device with mcd " + mcd + " is locked sucessfully");
 
-    @BeforeClass
-    /* First setup Keynote Connection */
-    public static void setUp() throws Exception {
-        try {
-            // create the session
-        	 keynoteClient = new KeynoteRESTClient(USER_NAME, PASSWORD, ACCESS_SERVER_URL);
-             keynoteClient.createSession();
+			// Upload Application to Keynote repository and get the URL to pass it to appium setcapability
+			ApplicationID = Integer.valueOf((KeynoteRESTClient.addApplication(ACCESS_SERVER_URL, appName, appType, appVersion, fileName,filepath)));
+			System.out.println("Application" + appName + " is uploaded with id " + ApplicationID);
+			
+			String App=KeynoteRESTClient.installApplication(sessionIDEnsem, ApplicationID);
+			
+			
+			// fire up appium on the device
+			appiumUrl = keynoteClient.startAppium(mcd);
+			if (appiumUrl.isEmpty()) {
+				Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
+			}
 
-             // lock a specific device
-             sessionIDEnsem=keynoteClient.lockDevice(mcd);
-	            System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
+			System.out.println("Appium Session is started on mcd " + mcd);
 
-             // fire up appium on the device
-             appiumUrl = keynoteClient.startAppium(mcd);
-             if(appiumUrl.isEmpty())
-             {
-             Asserts.notEmpty(appiumUrl, "Unable to start appium as return url for mcd " + mcd);
-             }
-             
-             System.out.println("Appium Session is started on mcd "+ mcd);
+			Thread.sleep(5000);
 
-             Thread.sleep(5000);
+		} catch (Exception e) {
+			System.out.println("Unable to create Keynote REST api connection. Exiting");
+			keynoteClient.logoutSession();
+			System.exit(1);
+		}
 
-     
-         
-        }catch (Exception e){
-            System.out.println("Unable to create Keynote REST api connection. Exiting");
-            keynoteClient.logoutSession();
-            System.exit(1);
-        }
+	}
 
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void appiumTest() throws InterruptedException {
 
-    }
-
-    @Test
-    public void appiumTest() throws InterruptedException
-    {
-
-    	DesiredCapabilities capabilities = new DesiredCapabilities();
+		DesiredCapabilities capabilities = new DesiredCapabilities();
 		capabilities.setCapability("platformVersion", "9.2");
 		capabilities.setCapability("deviceName", "iPhon6");
 		capabilities.setCapability("platformName", "iOS");
-		
-		//either provide  the URL to download the app as given below or provide the appActivity and appPackage in set capability.
-		
-		capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/5446.ipa ");
-		
-		//capabilities.setCapability("appPackage", "com.expensemanager");
-        //capabilities.setCapability("appActivity", "com.expensemanager.ExpenseManager");
-		
-		
+
+		/*
+		 * either provide the URL to download the application as given below or
+		 * provide the bundleId in set capability if application is already
+		 * installed on the phone.
+		 */
+
+		// capabilities.setCapability("app",AppUrl);
+
+		capabilities.setCapability("bundleId", "com.kone.KitchenSink");
+
+		// capabilities.setCapability("bundleId", "XYZ");
+
 		try {
+			
 			driver = new IOSDriver(new URL(appiumUrl), capabilities);
-	    
-			System.out.println("Executing Appium script on " + mcd);
-			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]")).click();
-			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[2]/UIATextField[1]")).sendKeys("Hello");
-			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[3]/UIATextField[1]")).sendKeys("Mytesting");
-			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[4]/UIATextField[1]")).sendKeys("777 Mariners island Blvd San Mateo");
-		    	
-		}
-		catch (MalformedURLException e) {
+
+			System.out.println("Executing Appium script on mcd " + mcd);
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAButton[2]")).click();
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+					.click();
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+					.click();
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+					.click();
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+					.click();
+			driver.findElement(
+					By.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAScrollView[1]/UIATextField[1]"))
+					.click();
+			driver.findElement(
+					By.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAScrollView[1]/UIATextField[1]"))
+					.sendKeys("Keynote Systems");
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAScrollView[2]/UIASecureTextField[1]"))
+					.sendKeys("Keynote Systems");
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[2]/UIAStaticText[1]"))
+					.click();
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+			driver.findElement(By
+					.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[3]/UIAStaticText[1]"))
+					.click();
+			driver.findElement(By.name("Accelerometer")).click();
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+			driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			System.out.println(e.getMessage());
-			
+
 			e.printStackTrace();
 		}
-    }
+	}
 
-    @After
-    public void tearDown() throws Exception {
-    	driver.quit();
-        //keynoteClient.stopAppium(mcd); // This will stop the Appium without log
-        keynoteClient.stopappiumwithlog(sessionIDEnsem, mcd);// This will stop the Appium and will download the Appium log file at userprofile desktop
-       
-         
-    }
-    @AfterClass
-    public static void logoutSystem()
-   
-    {
-    	keynoteClient.logoutSession();
-    	System.out.println("Logged out from Keynote Mobile Testing Session");
-    }
+	@After
+	public void tearDown() throws Exception {
+		driver.quit();
+		
+		// This line will stop the Appium without log
+		// keynoteClient.stopAppium(mcd); 
+		
+		/*This line will stop the Appium and will download the Appium logfile at userprofiledesktop*/
+		keynoteClient.stopappiumwithlog(sessionIDEnsem, mcd);// 
+
+	}
+
+	@AfterClass
+	public static void logoutSystem()
+
+	{
+		keynoteClient.logoutSession();
+		System.out.println("Logged out from Keynote Mobile Testing Session");
+	}
 
 }
- 

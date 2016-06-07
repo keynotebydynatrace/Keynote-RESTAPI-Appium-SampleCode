@@ -23,7 +23,7 @@ public class KeynoteParallel extends Parameterized {
         
         public ThreadPoolScheduler()
         {
-            String threads = System.getProperty("junit.parallel.threads", "2");
+            String threads = System.getProperty("junit.parallel.threads", "7");
             int numThreads = Integer.parseInt(threads);
             executor = Executors.newFixedThreadPool(numThreads);
         }

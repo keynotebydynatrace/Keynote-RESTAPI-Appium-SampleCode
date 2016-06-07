@@ -1,5 +1,6 @@
 package com.keynote.REST;
 
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -7,7 +8,9 @@ import org.junit.Assert;
 
 import com.google.common.base.Throwables;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +19,8 @@ import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.ws.rs.core.MediaType;
+
 
 
 public class KeynoteRESTClient {
@@ -23,7 +28,7 @@ public class KeynoteRESTClient {
     private String email;
     private String pass;
     private URL accessServerUrl;
-    private String sessionID;
+    private static String sessionID;
     private  OutputStream outputStream = null;
 
 
@@ -68,7 +73,7 @@ public class KeynoteRESTClient {
                 }
 
                 sessionID = (String)jsonObject.get("sessionID");
-                System.out.println("Keynote Mobile Testing Session created successfully with SessionID: " + sessionID);
+                System.out.println("Keynote Mobile Testing Session is created successfully with SessionID: " + sessionID);
                 return true;
             }
         } catch(Exception e) {
@@ -198,7 +203,118 @@ public class KeynoteRESTClient {
 	
     }
     
+    public static String addApplication( String URL, String appName, String appType, String appVersion, String fileName, String filePath)
+    {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            StringWriter writer = new StringWriter();
+            jsonObject.put("isSignApp", "true");
+            jsonObject.put("isEnableApp", "true");
+            jsonObject.put("appType", appType);
+            jsonObject.put("appName", appName);
+            jsonObject.put("appVersion", appVersion);
+            jsonObject.put("fileName", fileName);
+            File file = new File(filePath);
+            FileInputStream stream = new FileInputStream(file);
+            byte[] fileContent = new byte[8192];
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            int length = 0;
+            while((length = stream.read(fileContent)) > 0) {
+                byteArrayOutputStream.write(fileContent, 0, length);
+            }
+            Base64 base64 = new Base64();
+            String fileString = base64.encodeAsString(byteArrayOutputStream.toByteArray());
+            jsonObject.put("fileContent", fileString);
+            jsonObject.write(writer);
+            InputStream inputstream[] =
+            		RESTUtils.restRequest(URL + "/device/" + sessionID + "/" + "add-application",
+                        "POST", "application/json", "text/plain", writer.toString());
+            if(stream != null) {
+                return BufferUtils.getStringBuffer(inputstream[0]).toString();
+            }
+        } catch(Exception e1) {
+           e1.printStackTrace();
+        }
+        return null;
+    }
+
+public static byte[] downloadData(String downloadURL)
+{
+    InputStream inputstream[] =
+    		RESTUtils.restRequest(downloadURL,
+                    "GET", "application/text", "application/octet-stream", null);
+    try {
+        if (inputstream != null) {
+            byte[] data = new byte[8192];
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            int length = 0;
+            while ((length = inputstream[0].read(data, 0, data.length)) > 0) {
+                stream.write(data, 0, length);
+            }
+            return stream.toByteArray();
+        }
+    } catch(Exception e1) {
+        e1.printStackTrace();
+    }
+    return null;
+}
+
+public static String getURL(String URL,String appName, String appType, String appVersion)
+{
+    try {
+        JSONObject jsonObject = new JSONObject();
+        StringWriter writer = new StringWriter();
+        jsonObject.put("appType", appType);
+        jsonObject.put("appName", appName);
+        jsonObject.put("appVersion", appVersion);
+        jsonObject.write(writer);
+        InputStream inputstream[] =
+        		RESTUtils.restRequest(URL + "/applications/" + sessionID + "/" + "get-application-url",
+                        "POST", "application/json", "application/json", writer.toString());
+        if(inputstream!= null) {
+            return BufferUtils.getStringBuffer(inputstream[0]).toString();
+        }
+    } catch(Exception e1) {
+        e1.printStackTrace();
+    }
+    return null;
+
+}
+
+public static String installApplication(String ensembleURL, int applicationID)
+{
+    JSONObject jsonObject = new JSONObject();
+    StringWriter writer = new StringWriter();
+    jsonObject.put("applicationID", applicationID);
+   // jsonObject.put("launchApplication", true);
+    //jsonObject.put("removeApplication", true);
+    jsonObject.write(writer);
+
+    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
     
+    try {
+        InputStream[] streams = RESTUtils.restRequest(ensembleURL + "/install-application", "POST" , MediaType.APPLICATION_JSON, MediaType.WILDCARD, writer.toString());
+        if(streams != null && streams.length > 0) {
+            byte[] data = new byte[8 * 1024];
+            outputStream.reset();
+            while (true) {
+                int p = streams[0].read(data);
+                if(p < 0)
+                    break;
+                else
+                    outputStream.write(data, 0, p);
+            }
+
+            return new String(outputStream.toByteArray(), "UTF-8");
+        }
+    } catch(Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+
+
+
 
     public String logoutSession()
     {

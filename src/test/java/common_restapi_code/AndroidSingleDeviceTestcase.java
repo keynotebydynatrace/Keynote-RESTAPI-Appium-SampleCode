@@ -2,8 +2,11 @@ package common_restapi_code;
 import com.keynote.REST.KeynoteRESTClient;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
+import junit.framework.Assert;
 
 import org.apache.http.util.Asserts;
+import org.json.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -11,6 +14,7 @@ import org.junit.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
@@ -28,24 +32,27 @@ import java.util.concurrent.TimeUnit;
 
 public class AndroidSingleDeviceTestcase {
 
-  /*  public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
+   public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
     public static final String USER_NAME = "******";
-    public static final String PASSWORD = "******";*/
-    
-    public static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
-    public static final String USER_NAME = "aditya@mc.com";
-    public static final String PASSWORD = "Harmony1";
-
-    static int mcd = 9233;
+    public static final String PASSWORD = "******";
+    private static int mcd = 1234;
     static String appiumUrl;
     private static AppiumDriver driver;
     private static KeynoteRESTClient keynoteClient;
-    static String sessionIDEnsem="";
+    private static String sessionIDEnsem="";
+    private static String appName = "KeynoteDemo";
+    private static String appVersion = "1.3";
+    private static String fileName = "KeynoteDemo-debug.apk";
+    private static String appType = "ANDROID_APK";
+    private static String filepath="KeynoteDemo-debug.apk";
+    private static String ApplicationID;
+    private static String AppUrl="";
 
     @BeforeClass
     /* First setup Keynote Connection */
     public static void setUp() throws Exception {
         try {
+        	
             // create the session
             keynoteClient = new KeynoteRESTClient(USER_NAME, PASSWORD, ACCESS_SERVER_URL);
             keynoteClient.createSession();
@@ -53,8 +60,21 @@ public class AndroidSingleDeviceTestcase {
             // lock a specific device
             sessionIDEnsem=keynoteClient.lockDevice(mcd);
             System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
-
-            // fire up appium on the device
+            
+            
+          //Upload Application to Keynote mobile testing repository and get the URL to pass it to appium setcapability
+      
+            
+            filepath = AndroidSingleDeviceTestcase.class.getClassLoader().getResource(fileName).getFile();
+            ApplicationID=(KeynoteRESTClient.addApplication(ACCESS_SERVER_URL, appName, appType, appVersion,fileName, filepath));
+	    	System.out.println("Application uploaded with id "+ ApplicationID);
+	    	String parseUrl=KeynoteRESTClient.getURL(ACCESS_SERVER_URL, appName, appType, appVersion);
+	    	JSONObject jsonObj = new JSONObject(parseUrl);;
+	    	AppUrl = jsonObj.getString("value");
+	    	System.out.println("Your Application URL is: " + AppUrl);
+	    	
+    
+            // Fire up appium on the device
             appiumUrl = keynoteClient.startAppium(mcd);
             if(appiumUrl.isEmpty())
             {
@@ -68,7 +88,7 @@ public class AndroidSingleDeviceTestcase {
         }
         
         catch (Exception e){
-            System.out.println("Unable to create Keynote REST api connection. Exiting");
+            System.out.println(e);
             keynoteClient.logoutSession();
             System.exit(1);
         }
@@ -76,7 +96,8 @@ public class AndroidSingleDeviceTestcase {
 
     }
 
-    @Test
+    @SuppressWarnings("rawtypes")
+	@Test
     public void appiumTest() throws InterruptedException
     {
 
@@ -86,13 +107,14 @@ public class AndroidSingleDeviceTestcase {
         capabilities.setCapability("platformVersion", "5.0.1");
         capabilities.setCapability("platformName","Android");
        
-      //either provide  the URL to download the application as given below or provide the appActivity and appPackage in set capability.
+      /*either provide  the URL to download the application as given below or
+       provide the appActivity and appPackage in set capability if app is already installed on the phone.*/
       
-        //capabilities.setCapability("app", "http://dademo111.deviceanywhere.com/app/534050.apk");
+        capabilities.setCapability("app", AppUrl);
         
         
-        capabilities.setCapability("appPackage", "com.expensemanager");
-        capabilities.setCapability("appActivity", "com.expensemanager.ExpenseManager");
+       // capabilities.setCapability("appPackage", "com.keynote.keynotedemo");
+        //capabilities.setCapability("appActivity", "com.keynote.keynotedemo.UserInfo");
         
         
         try {
@@ -105,29 +127,25 @@ public class AndroidSingleDeviceTestcase {
 
         try
         {
-        	System.out.println("Executing Appium script on " + mcd);
-            driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-            Thread.sleep(2000);
-            driver.findElement(By.name("Add New Expense")).click();
-            Thread.sleep(3000);
-            driver.findElement(By.xpath("//android.widget.EditText[@resource-id='com.expensemanager:id/expenseAmountInput']")).sendKeys("80");
-            Thread.sleep(2000);
-
-            driver.findElement(By.xpath("//android.widget.EditText[@resource-id='com.expensemanager:id/payee']")).sendKeys("BOFA");
-            driver.findElement(By.xpath("//android.widget.ImageButton[@resource-id='com.expensemanager:id/editCategory']")).click();
-            driver.findElement(By.name("OK")).click();
-            driver.findElement(By.name("Loans")).click();
-            driver.findElement(By.name("Auto")).click();
-            driver.findElement(By.xpath("//android.widget.ImageButton[@resource-id='com.expensemanager:id/editPaymentMethod']")).click();
-            driver.findElement(By.name("Credit Card")).click();
-            driver.findElement(By.name("OK")).click();
-            driver.findElement(By.name("Today Expense:")).click();
-            driver.findElement(By.name("Loans:Auto")).click();
-            driver.findElement(By.name("Delete")).click();
-            driver.findElement(By.name("OK")).click();
-            driver.navigate().back();
-
-
+        	System.out.println("Executing Appium script on mcd " + mcd);
+        	
+        	driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/title"));
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/edit_first_name")).sendKeys("Jack ");
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/edit_last_name")).sendKeys("Turner");
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/edit_phone")).sendKeys("777-777-777");
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/radioMale")).click();
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/edit_email")).sendKeys("Jack@mobiletest.com");
+        	driver.navigate().back();
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/spinner1")).click();
+        	driver.findElement(By.name("Spanish")).click();
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/next_button")).click();
+        	Thread.sleep(2000);
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/edit_recipients")).sendKeys("test@demo.com");
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/edit_message")).sendKeys("Welcome to Keynote Mobile Tetsing demo");
+        	driver.findElement(By.id("com.keynote.keynotedemo:id/send_button")).click();
+        	
+        	
 
         }
         catch (InterruptedException e)
@@ -150,7 +168,6 @@ public class AndroidSingleDeviceTestcase {
     @AfterClass 
     public static void logoutSystem() {
 
-        
         keynoteClient.logoutSession();
     	System.out.println("Logged out from Keynote Mobile Testing Session");
     }

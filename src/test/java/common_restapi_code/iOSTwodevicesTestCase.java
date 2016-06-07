@@ -35,18 +35,23 @@ import org.junit.runners.Parameterized;
 @RunWith(KeynoteParallel.class)
 //@RunWith(Parameterized.class)
 public class iOSTwodevicesTestCase {
-	    private static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
-	   private static final String USER_NAME = "aditya@mc.com";
-	   // private static final String USER_NAME = "kapeel@qatest.com";
-	    private static final String PASSWORD = "Harmony1";
+	public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
+	public static final String USER_NAME = "admin@tce.com";
+	public static final String PASSWORD = "Password1";;
+	    private static String appName = "KitchenSinkApp";
+		private static String appVersion = "1.3";
+		private static String fileName = "KitchenSinkApp.ipa";
+		private static String appType = "iPhone";
+		private static String filepath = "C:/Users/kmaheshw.WIN/Desktop/8.1 Sprint/iOSOfflineAutomation/KitchenSinkApp.ipa";
+		private static int ApplicationID ;
 	    
 	    private static KeynoteRESTClient keynoteClient;
 	    
 	    @Parameterized.Parameters
 	    public static Collection deviceMCDs() {
 	       return Arrays.asList(new Object[][] {
-	          {8501 },  //Enter device mcd's here
-	          { 9217 }
+	          {30053 },  //Enter device mcd's here
+	          { 30056 }
 	          //{6984}
 	       });
 	    }
@@ -54,7 +59,7 @@ public class iOSTwodevicesTestCase {
 
 	    String appiumUrl;
 	    AppiumDriver driver;
-	    String sessionIDEnsem="";
+	    static String sessionIDEnsem="";
 	    int mcd;
 	    
 	    /* First setup Keynote Connection */
@@ -68,6 +73,13 @@ public class iOSTwodevicesTestCase {
 				keynoteClient.createSession();
             
             Thread.sleep(2000);
+            
+         // Upload Application to Keynote repository and get the URL to pass it to appium setcapability
+         			ApplicationID = Integer.valueOf((KeynoteRESTClient.addApplication(ACCESS_SERVER_URL, appName, appType, appVersion, fileName,filepath)));
+         			System.out.println("Application " + appName + " is uploaded with id " + ApplicationID);
+         			
+         			
+         			
         	} catch (Exception e) {
 				Asserts.check(false, "Unable to create Keynote REST api connection. Exiting");
 				keynoteClient.logoutSession();
@@ -82,6 +94,8 @@ public class iOSTwodevicesTestCase {
 	            // lock a specific device
 	            sessionIDEnsem=keynoteClient.lockDevice(mcd);
 	            System.out.println("Device with mcd " + mcd + " is locked sucessfully" );
+	            
+	            String App=KeynoteRESTClient.installApplication(sessionIDEnsem, ApplicationID);
 	            
 	            // fire up appium on the device
 	            appiumUrl = keynoteClient.startAppium(mcd);
@@ -105,17 +119,58 @@ public class iOSTwodevicesTestCase {
 			capabilities.setCapability("platformVersion", "9.2");
 			capabilities.setCapability("deviceName", "iPhon6");
 			capabilities.setCapability("platformName", "iOS");
-			// capabilities.setCapability("browserName", "safari");
-			capabilities.setCapability("app", "http://tcportal21qasm.win.keynote.com/app/6509.ipa");
+			/*
+			 * either provide the URL to download the application as given below or
+			 * provide the bundleId in set capability if application is already
+			 * installed on the phone.
+			 */
+
+			// capabilities.setCapability("app",AppUrl);
+
+			capabilities.setCapability("bundleId", "com.kone.KitchenSink");
+
+			// capabilities.setCapability("bundleId", "XYZ");
 			
 			try {
-				System.out.println("Executing Appium script on " + mcd);
+				System.out.println("Executing Appium script on mcd " + mcd);
 				driver = new IOSDriver(new URL(appiumUrl), capabilities);
 				
-				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]")).click();
-				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[2]/UIATextField[1]")).sendKeys("Hello");
-				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[3]/UIATextField[1]")).sendKeys("Mytesting");
-				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIATableView[1]/UIATableCell[4]/UIATextField[1]")).sendKeys("777 Mariners island Blvd San Mateo");
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAButton[2]")).click();
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+						.click();
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+						.click();
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+						.click();
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[1]/UIAStaticText[1]"))
+						.click();
+				driver.findElement(
+						By.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAScrollView[1]/UIATextField[1]"))
+						.click();
+				driver.findElement(
+						By.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAScrollView[1]/UIATextField[1]"))
+						.sendKeys("Keynote Systems");
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIAScrollView[2]/UIASecureTextField[1]"))
+						.sendKeys("Keynote Systems");
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[2]/UIAStaticText[1]"))
+						.click();
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+				driver.findElement(By
+						.xpath("//UIAApplication[1]/UIAWindow[2]/UIAScrollView[1]/UIATableView[1]/UIATableCell[3]/UIAStaticText[1]"))
+						.click();
+				driver.findElement(By.name("Accelerometer")).click();
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
+				driver.findElement(By.xpath("//UIAApplication[1]/UIAWindow[2]/UIANavigationBar[1]/UIAButton[1]")).click();
 			    	
 			}
 			catch (MalformedURLException e) {

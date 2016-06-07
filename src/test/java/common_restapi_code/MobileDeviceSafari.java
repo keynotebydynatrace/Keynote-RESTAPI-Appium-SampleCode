@@ -29,17 +29,11 @@ import io.appium.java_client.remote.MobileCapabilityType;
  * 
  */
 public class MobileDeviceSafari {
-	/*  public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
+	public static final String ACCESS_SERVER_URL = "https://tceaccess.deviceanywhere.com:6232/resource";
     public static final String USER_NAME = "******";
-    public static final String PASSWORD = "******";*/
+    public static final String PASSWORD = "******";
     
-    public static final String ACCESS_SERVER_URL = "https://dadaccess12qasm.keynote.com:6232/resource";
-    public static final String USER_NAME = "aditya@mc.com";
-    public static final String PASSWORD = "Harmony1";
-	
-	
-
-    static int mcd = 8501; // Please provide the mcd number here.
+    static int mcd = 1234; // Please provide the mcd number here.
     static String appiumUrl;
     static AppiumDriver driver = null;
     static String sessionIDEnsem="";
@@ -91,7 +85,7 @@ public class MobileDeviceSafari {
 		
 		try 
 		{
-			
+			System.out.println("Executing Appium script on mcd " + mcd);
 			driver = new IOSDriver(new URL(appiumUrl), capabilities);
 			driver.get("http://www.google.com");
 			driver.get("http://www.yahoo.com");
