@@ -14,5 +14,5 @@ Test mobile applications and responsive websites on real devices using scripts d
 
 ##Getting Started
 
-* Keynote Mobile Testing account - [Get a new account now](http://www.keynote.com/forms/get-started?int=appium-integration)
+* Keynote Mobile Enterprise Testing account - [Get a new account now](http://www.keynote.com/forms/get-started?int=appium-integration)
 
